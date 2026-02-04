@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    ✏️ Modifica Intervento #{{ intervento.id }}
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Data</label>
+                                <input type="date" name="data" class="form-control"
+                                    value="{{ intervento.data_intervento }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" name="is_chiamata" {% if
+                                        intervento.is_chiamata %}checked{% endif %}>
+                                    <label class="form-check-label">È una Chiamata?</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cliente</label>
+                                <select name="id_anagrafica" class="form-select" required>
+                                    {% for a in anagrafiche %}
+                                    <option value="{{ a.id }}" {% if a.id==intervento.id_anagrafica %}selected{% endif
+                                        %}>
+                                        {{ a.ragione_sociale }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Staff Assegnato</label>
+                                <select name="id_staff" class="form-select" required>
+                                    {% for s in staffs %}
+                                    <option value="{{ s.id }}" {% if s.id==intervento.id_staff %}selected{% endif %}>
+                                        {{ s.nome }} {{ s.cognome }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Descrizione</label>
+                                <textarea name="descrizione" class="form-control"
+                                    rows="3">{{ intervento.descrizione }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Link Documento (Dropbox/Drive)</label>
+                                <input type="url" name="link" class="form-control"
+                                    value="{{ intervento.link_documento }}">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-input" type="checkbox" name="stato" {% if intervento.stato
+                                        %}checked{% endif %}>
+                                    <label class="form-check-label">Segna come CHIUSO</label>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                                <a href="{{ url_for('report_interventi') }}" class="btn btn-secondary">Annulla</a>
+                                <button type="submit" class="btn btn-warning">Salva Modifiche</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

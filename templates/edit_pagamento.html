@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow mx-auto" style="max-width: 400px;">
+        <div class="card-header bg-warning">Modifica Metodo Pagamento</div>
+        <div class="card-body">
+            <form method="POST">
+                <label>Descrizione</label>
+                <input type="text" name="desc" value="{{ pag.descrizione }}" class="form-control mb-3" required>
+                <button type="submit" class="btn btn-primary w-100">Salva Modifiche</button>
+                <a href="{{ url_for('config_spese') }}" class="btn btn-link w-100 mt-2 text-secondary">Annulla</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

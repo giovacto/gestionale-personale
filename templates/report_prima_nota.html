@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4 text-success">💰 Report Contabile (Prima Nota)</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body bg-light">
+            <form method="POST" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Categoria</label>
+                    <select name="id_categoria" class="form-select">
+                        <option value="">Tutte le categorie</option>
+                        {% for cat in categorie %}
+                        <option value="{{ cat.id }}">{{ cat.nome_categoria }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Staff</label>
+                    <select name="id_staff" class="form-select">
+                        <option value="">Tutto lo staff (o non assegnato)</option>
+                        {% for s in staff_list %}
+                        <option value="{{ s.id }}">{{ s.nome }} {{ s.cognome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Descrizione (Cerca...)</label>
+                    <input type="text" name="descrizione" class="form-control" placeholder="es: benzina o prova">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Metodo Pagamento</label>
+                    <select name="id_pagamento" class="form-select">
+                        <option value="">Tutti i metodi</option>
+                        {% for pag in pagamenti %}
+                        <option value="{{ pag.id }}">{{ pag.descrizione }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Da data</label>
+                    <input type="date" name="data_da" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">A data</label>
+                    <input type="date" name="data_a" class="form-control">
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100 shadow-sm">
+                        <i class="bi bi-search"></i> Genera Report Filtrato
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if filtri_attivi %}
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100 p-3">
+                <h5 class="text-muted border-bottom pb-2">Riepilogo Periodo</h5>
+                <div class="alert alert-danger d-flex justify-content-between py-2">
+                    <span>Totale Uscite:</span>
+                    <strong>€ {{ "%.2f"|format(tot_uscita) }}</strong>
+                </div>
+                <div class="alert alert-success d-flex justify-content-between py-2">
+                    <span>Totale Entrate:</span>
+                    <strong>+ € {{ "%.2f"|format(tot_entrata) }}</strong>
+                </div>
+                <div class="alert alert-primary d-flex justify-content-between mb-0 py-2">
+                    <span>Bilancio Netto:</span>
+                    <strong>€ {{ "%.2f"|format(tot_entrata - tot_uscita) }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100 p-3">
+                <h5 class="text-center text-muted border-bottom pb-2">Distribuzione Spese</h5>
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <canvas id="pieSpese"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 text-dark">Elenco Movimenti Filtrati ({{ report|length }})</h5>
+            <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-printer"></i> Stampa o PDF
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Staff</th>
+                        <th>Categoria</th>
+                        <th>Descrizione</th>
+                        <th class="text-end text-danger">Uscita</th>
+                        <th class="text-end text-success">Entrata</th>
+                        <th class="text-center">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in report %}
+                    <tr>
+                        <td>{{ r.data.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            {% if r.staff_cognome %}
+                            <small>{{ r.staff_nome }} {{ r.staff_cognome }}</small>
+                            {% else %}
+                            <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge rounded-pill bg-secondary">{{ r.nome_categoria }}</span></td>
+                        <td><small>{{ r.descrizione }}</small></td>
+                        <td class="text-end text-danger">
+                            {% if r.costo > 0 %} - € {{ "%.2f"|format(r.costo) }} {% endif %}
+                        </td>
+                        <td class="text-end text-success">
+                            {% if r.incassato > 0 %} + € {{ "%.2f"|format(r.incassato) }} {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <a href="{{ url_for('edit_spesa', id=r.id) }}" class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('delete_spesa', id=r.id) }}" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Sicuro?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labelsData = {{ labels_pie | tojson | safe }};
+        const valuesData = {{ valori_pie | tojson | safe }};
+
+        if (labelsData.length > 0) {
+            const ctxPie = document.getElementById('pieSpese').getContext('2d');
+            new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: labelsData,
+                    datasets: [{
+                        data: valuesData,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#8bc34a', '#20c997'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 15 } } }
+                }
+            });
+        }
+    </script>
+    {% else %}
+    <div class="alert alert-info mt-4">Usa i filtri sopra per visualizzare i dati.</div>
+    {% endif %}
+</div>
+{% endblock %}

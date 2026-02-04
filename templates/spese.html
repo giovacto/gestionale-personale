@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4 text-primary">💰 Gestione Prima Nota</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">Nuovo Movimento</div>
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label">Data</label>
+                    <input type="date" name="data" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Chi ha speso? (Staff)</label>
+                    <select name="id_staff" class="form-select">
+                        <option value="">Seleziona Membro Staff...</option>
+                        {% for s in staff %}
+                        <option value="{{ s.id }}">{{ s.nome }} {{ s.cognome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Categoria</label>
+                    <select name="id_categoria" class="form-select" required>
+                        {% for c in categorie %}
+                        <option value="{{ c.id }}">{{ c.nome_categoria }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Metodo Pagamento</label>
+                    <select name="id_pagamento" class="form-select" required>
+                        {% for p in pagamenti %}
+                        <option value="{{ p.id }}">{{ p.descrizione }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-danger">Uscita (€)</label>
+                    <input type="number" step="0.01" name="costo" class="form-control" placeholder="0.00">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-success">Entrata (€)</label>
+                    <input type="number" step="0.01" name="incassato" class="form-control" placeholder="0.00">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Descrizione</label>
+                    <input type="text" name="descrizione" class="form-control" placeholder="Dettagli spesa...">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Registra</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Data</th>
+                        <th>Chi (Staff)</th>
+                        <th>Categoria</th>
+                        <th>Descrizione</th>
+                        <th class="text-end">Uscita</th>
+                        <th class="text-end">Entrata</th>
+                        <th class="text-center">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in movimenti %}
+                    <tr>
+                        <td>{{ m.data.strftime('%d/%m/%Y') }}</td>
+                        <td><strong>{{ m.staff_cognome if m.staff_cognome else '-' }}</strong></td>
+                        <td><span class="badge bg-secondary">{{ m.nome_categoria }}</span></td>
+                        <td>{{ m.descrizione }}</td>
+                        <td class="text-end text-danger">{% if m.costo > 0 %}- € {{ "%.2f"|format(m.costo) }}{% endif %}
+                        </td>
+                        <td class="text-end text-success">{% if m.incassato > 0 %}+ € {{ "%.2f"|format(m.incassato) }}{%
+                            endif %}</td>
+                        <td class="text-center">
+                            <a href="{{ url_for('delete_spesa', id=m.id) }}" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Eliminare?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

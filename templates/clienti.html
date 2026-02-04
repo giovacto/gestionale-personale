@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>👥 Gestione Anagrafiche Clienti</h2>
+    <span class="badge bg-secondary">Totale Clienti: {{ anagrafiche|length }}</span>
+</div>
+
+<div class="card shadow-sm mb-5">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Aggiungi Nuovo Cliente</h5>
+    </div>
+    <div class="card-body bg-light">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Ragione Sociale (Azienda)</label>
+                    <input type="text" name="ragione_sociale" class="form-control" placeholder="Es: Rossi S.r.l."
+                        required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">P.IVA / Codice Fiscale</label>
+                    <input type="text" name="codice_fiscale" class="form-control" placeholder="11 o 16 caratteri"
+                        required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Cellulare</label>
+                    <input type="text" name="cellulare" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Nome (Referente)</label>
+                    <input type="text" name="nome" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Cognome (Referente)</label>
+                    <input type="text" name="cognome" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="esempio@mail.it">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">💾 Salva</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ragione Sociale</th>
+                    <th>Referente</th>
+                    <th>Contatti</th>
+                    <th>P.IVA/CF</th>
+                    <th class="text-center">Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in anagrafiche %}
+                <tr>
+                    <td class="fw-bold text-primary">{{ row.ragione_sociale }}</td>
+                    <td>{{ row.nome }} {{ row.cognome }}</td>
+                    <td>
+                        <small>
+                            📱 {{ row.cellulare }}<br>
+                            📧 {{ row.email }}
+                        </small>
+                    </td>
+                    <td><code>{{ row.codice_fiscale }}</code></td>
+                    <td class="text-center">
+                        <div class="btn-group">
+                            <a href="{{ url_for('edit', id=row.id) }}" class="btn btn-sm btn-outline-warning">⚙️
+                                Modifica</a>
+                            <a href="{{ url_for('delete', id=row.id) }}" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Attenzione: eliminando il cliente eliminerai anche la possibilità di associarlo a nuovi interventi. Confermi?');">
+                                🗑️ Elimina
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">Nessun cliente in archivio.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

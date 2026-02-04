@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">📊 Report Interventi</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">Filtra Risultati</div>
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Cliente</label>
+                    <select name="id_cliente" class="form-select">
+                        <option value="">Tutti i clienti</option>
+                        {% for c in clienti %}
+                        <option value="{{ c.id }}">{{ c.ragione_sociale }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Stato</label>
+                    <select name="stato" class="form-select">
+                        <option value="">Tutti</option>
+                        <option value="0">Aperto</option>
+                        <option value="1">Chiuso</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Descrizione (anche parziale)</label>
+                    <input type="text" name="descrizione" class="form-control" placeholder="es: prova">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Dalla data</label>
+                    <input type="date" name="data_da" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Alla data</label>
+                    <input type="date" name="data_a" class="form-control">
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary shadow-sm">🔍 Filtra Risultati</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if filtri_attivi %}
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Risultati Trovati: <strong>{{ report|length }}</strong></span>
+            <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">🖨️ Stampa PDF</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Tipo</th>
+                        <th>Staff</th>
+                        <th>Descrizione</th>
+                        <th class="text-center">Link</th>
+                        <th>Stato</th>
+                        <th class="text-center">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in report %}
+                    <tr>
+                        <td>{{ r.data_intervento.strftime('%d/%m/%Y') }}</td>
+                        <td class="fw-bold">{{ r.cliente_nome }}</td>
+                        <td>
+                            {% if r.is_chiamata %}
+                            <span class="badge bg-danger">Chiamata</span>
+                            {% else %}
+                            <span class="badge bg-primary">Attività</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.staff_cognome }}</td>
+                        <td>{{ r.descrizione }}</td>
+                        <td class="text-center">
+                            {% if r.link_documento %}
+                            <a href="{{ r.link_documento }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-file-earmark-text"></i> Apri
+                            </a>
+                            {% else %}
+                            <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r.stato == 1 %}
+                            <span class="badge bg-success">✔ Chiuso</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">● Aperto</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('edit_intervento', id=r.id) }}" class="btn btn-sm btn-outline-warning"
+                                title="Modifica">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">Nessun dato trovato per i filtri selezionati.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Seleziona i filtri sopra e clicca su "Filtra" per visualizzare i dati.</div>
+    {% endif %}
+</div>
+{% endblock %}

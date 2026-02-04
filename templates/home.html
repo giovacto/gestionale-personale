@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Benvenuto, {{ session['user_name'] }}</h1>
+        <p class="lead text-muted">Ecco il riepilogo della tua attività per il mese corrente.</p>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold">💰 Bilancio Mese Corrente</div>
+                <div class="card-body d-flex flex-column align-items-center">
+                    <canvas id="chartSpese" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold">🛠️ Interventi (Ultimi 30 gg)</div>
+                <div class="card-body d-flex flex-column align-items-center">
+                    <canvas id="chartInterventi" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card p-4 shadow border-0 bg-primary text-white h-100">
+                <h3>GESTIONE INTERVENTI</h3>
+                <p>Accedi alle anagrafiche clienti e al registro tecnico.</p>
+                <a href="{{ url_for('interventi') }}" class="btn btn-light btn-lg mt-auto">Entra</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-4 shadow border-0 bg-success text-white h-100">
+                <h3>GESTIONE SPESE</h3>
+                <p>Registra movimenti, fatture e consulta la prima nota.</p>
+                <a href="{{ url_for('spese') }}" class="btn btn-light btn-lg mt-auto">Entra</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Grafico Bilancio (Entrate vs Uscite)
+    const ctxSpese = document.getElementById('chartSpese').getContext('2d');
+    new Chart(ctxSpese, {
+        type: 'bar',
+        data: {
+            labels: ['Uscite (€)', 'Entrate (€)'],
+            datasets: [{
+                data: [{{ spese.tot_costi }}, {{ spese.tot_incassi }}],
+        backgroundColor: ['#dc3545', '#198754'],
+        borderRadius: 8
+    }]
+        },
+        options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+    });
+
+    // Grafico Interventi (Attività vs Chiamate)
+    const ctxInt = document.getElementById('chartInterventi').getContext('2d');
+    new Chart(ctxInt, {
+        type: 'doughnut',
+        data: {
+            labels: ['Attività', 'Chiamate'],
+            datasets: [{
+                data: [{{ interventi.attivita or 0 }}, {{ interventi.chiamate or 0 }}],
+        backgroundColor: ['#0d6efd', '#fd7e14']
+    }]
+        },
+        options: {
+        cutout: '70%',
+        plugins: { legend: { position: 'bottom' } }
+    }
+    });
+</script>
+{% endblock %}

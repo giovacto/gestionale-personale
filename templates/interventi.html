@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">🛠️ Gestione Interventi</h2>
+        <a href="{{ url_for('clienti') }}" class="btn btn-outline-primary">
+            👥 Gestisci Clienti
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Nuovo Intervento</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('interventi') }}" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Data</label>
+                        <input type="date" name="data" class="form-control" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Staff</label>
+                        <select name="id_staff" class="form-select" required>
+                            <option value="" selected disabled>Seleziona...</option>
+                            {% for s in staffs %}
+                            <option value="{{ s.id }}">{{ s.cognome }} {{ s.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Cliente</label>
+                        <select name="id_anagrafica" class="form-select" required>
+                            <option value="" selected disabled>Seleziona...</option>
+                            {% for a in anagrafiche %}
+                            <option value="{{ a.id }}">{{ a.ragione_sociale }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted">Cliente non in lista? <a href="{{ url_for('clienti') }}">Aggiungilo
+                                qui</a></small>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-md-12">
+                        <div class="form-check form-switch p-3 border rounded bg-light">
+                            <input class="form-check-input" type="checkbox" id="checkTipo" name="is_chiamata">
+                            <label class="form-check-label fw-bold text-primary" for="checkTipo"
+                                id="labelTipo">ATTIVITÀ</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-md-8">
+                        <label class="form-label">Descrizione</label>
+                        <textarea name="descrizione" class="form-control" rows="2" placeholder="Cosa è stato fatto..."
+                            required></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Link Avanzamento (URL)</label>
+                        <input type="text" name="link" class="form-control" placeholder="https://docs.google.com/...">
+                    </div>
+                </div>
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-success px-5">Salva Intervento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5>Storico Lavori in Corso</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo (clicca x cambio)</th>
+                        <th>Cliente</th>
+                        <th>Descrizione</th>
+                        <th class="text-center">Doc</th>
+                        <th class="text-end">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in interventi %}
+                    <tr>
+                        <td>{{ i.data_intervento }}</td>
+                        <td>
+                            <a href="{{ url_for('toggle_tipo_intervento', id=i.id) }}" style="text-decoration: none;">
+                                {% if i.is_chiamata == 1 %}
+                                <span class="badge bg-danger">CHIAMATA</span>
+                                {% else %}
+                                <span class="badge bg-primary">ATTIVITÀ</span>
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td class="fw-bold">
+                            <a href="{{ url_for('edit', id=i.id_anagrafica) }}" title="Vai alla scheda cliente">
+                                {{ i.cliente_nome }}
+                            </a>
+                        </td>
+                        <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                            title="{{ i.descrizione }}">
+                            {{ i.descrizione }}
+                        </td>
+            
+                        <td class="text-center">
+                            {% if i.link_documento %}
+                            <a href="{{ i.link_documento }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-file-earmark-text"></i> Apri
+                            </a>
+                            {% else %}
+                            <span class="text-muted small">-</span>
+                            {% endif %}
+                        </td>
+            
+                        <td class="text-end">
+                            <a href="{{ url_for('chiudi_intervento', id=i.id) }}" class="btn btn-sm btn-success"
+                                onclick="return confirm('Vuoi archiviare questo intervento?');">
+                                Chiudi
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">Nessun intervento attivo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('checkTipo').addEventListener('change', function () {
+        const label = document.getElementById('labelTipo');
+        if (this.checked) {
+            label.textContent = "CHIAMATA";
+            label.classList.replace('text-primary', 'text-danger');
+        } else {
+            label.textContent = "ATTIVITÀ";
+            label.classList.replace('text-danger', 'text-primary');
+        }
+    });
+</script>
+{% endblock %}

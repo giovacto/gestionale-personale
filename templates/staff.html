@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>👥 Gestione Staff (Admin)</h2>
+    <span class="badge bg-secondary">Membri in organico: {{ staff_list|length }}</span>
+</div>
+
+<div class="card shadow-sm mb-5">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Aggiungi Nuovo Collaboratore</h5>
+    </div>
+    <div class="card-body bg-light">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Nome</label>
+                    <input type="text" name="nome" class="form-control" placeholder="Es: Mario" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Cognome</label>
+                    <input type="text" name="cognome" class="form-control" placeholder="Es: Rossi" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="mario.rossi@ditta.it" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Cellulare</label>
+                    <input type="text" name="cellulare" class="form-control" placeholder="333...">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">➕</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nome e Cognome</th>
+                    <th>Email</th>
+                    <th>Cellulare</th>
+                    <th class="text-center">Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in staff_list %}
+                <tr>
+                    <td class="fw-bold">{{ s.cognome }} {{ s.nome }}</td>
+                    <td>{{ s.email }}</td>
+                    <td>{{ s.cellulare }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('delete_staff', id=s.id) }}" class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('Sei sicuro di voler rimuovere {{ s.nome }} {{ s.cognome }} dallo staff?');">
+                            🗑️ Rimuovi
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">Nessun membro dello staff registrato.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">⚙️ Configurazione Spese</h2>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Nuova Categoria Acquisto</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="mb-4" id="formCategoria">
+                        <div class="input-group">
+                            <input type="text" name="nome_categoria" id="inputCategoria" class="form-control"
+                                placeholder="Es: Carburante, Materiale..." required>
+                            <button type="submit" name="add_categoria" class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Aggiungi
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="tabellaCategorie">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome Categoria</th>
+                                    <th class="text-end">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in categorie %}
+                                <tr>
+                                    <td class="nome-voce fw-bold">{{ c.nome_categoria }}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('edit_categoria', id=c.id) }}"
+                                                class="btn btn-sm btn-outline-warning">⚙️</a>
+                                            <a href="{{ url_for('delete_categoria', id=c.id) }}"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Eliminare questa categoria?');">🗑️</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Nuovo Metodo Pagamento</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="mb-4" id="formPagamento">
+                        <div class="input-group">
+                            <input type="text" name="descrizione_pagamento" id="inputPagamento" class="form-control"
+                                placeholder="Es: Bonifico, Contanti..." required>
+                            <button type="submit" name="add_pagamento" class="btn btn-success">
+                                <i class="bi bi-plus-lg"></i> Aggiungi
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="tabellaPagamenti">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Descrizione</th>
+                                    <th class="text-end">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in pagamenti %}
+                                <tr>
+                                    <td class="desc-voce fw-bold">{{ p.descrizione }}</td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('edit_pagamento', id=p.id) }}"
+                                                class="btn btn-sm btn-outline-warning">⚙️</a>
+                                            <a href="{{ url_for('delete_pagamento', id=p.id) }}"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Eliminare il metodo?');">🗑️</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function verificaSimilitudine(idInput, classeCelle) {
+            const input = document.getElementById(idInput);
+            const vociEsistenti = document.querySelectorAll('.' + classeCelle);
+
+            let nuovoValore = input.value.toLowerCase().trim();
+            let paroleNuove = nuovoValore.split(/\s+/);
+
+            for (let voce of vociEsistenti) {
+                let testoEsistente = voce.textContent.toLowerCase().trim();
+
+                // 1. Controllo duplicato esatto
+                if (testoEsistente === nuovoValore) {
+                    return confirm(`Attenzione: "${voce.textContent}" esiste già esattamente così.\nVuoi procedere comunque?`);
+                }
+
+                // 2. Controllo parole contenute (almeno 3 caratteri)
+                for (let parola of paroleNuove) {
+                    if (parola.length > 2 && testoEsistente.includes(parola)) {
+                        return confirm(`Avviso: La voce inserita contiene parole simili a "${voce.textContent}" già presente.\nVuoi continuare lo stesso?`);
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Intercettazione invio Categorie
+        document.getElementById('formCategoria').onsubmit = function () {
+            return verificaSimilitudine('inputCategoria', 'nome-voce');
+        };
+
+        // Intercettazione invio Pagamenti
+        document.getElementById('formPagamento').onsubmit = function () {
+            return verificaSimilitudine('inputPagamento', 'desc-voce');
+        };
+    });
+</script>
+{% endblock %}
